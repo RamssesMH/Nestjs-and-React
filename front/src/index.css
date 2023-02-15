@@ -1,0 +1,18 @@
+/* 
+html, body {
+    background-color: #21232A;
+    color: white;
+    font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;
+    font-size: 1.3rem;
+    
+} */
+
+#modalPrimario {
+    
+    color: white;
+    
+}
+div.w-33 {
+    width: 100%;
+    text-align: center;
+  }
