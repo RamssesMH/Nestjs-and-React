@@ -5,6 +5,8 @@ export class CreateResponsivaDto {
     @IsString()
     matricula: string;
     @IsString()
+    status: string;
+    @IsString()
     @MinLength(10)
     nombre: string;
     @IsString()

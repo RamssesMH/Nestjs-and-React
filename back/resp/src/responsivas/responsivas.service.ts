@@ -114,6 +114,11 @@ export class ResponsivasService {
         objetos =await this.responsivaModel.find({tipoResponsiva:{ $regex: '.*' + term + '.*' }});
         if ( objetos.length==0 ) {
           objetos =await this.responsivaModel.find({matricula:{ $regex: '.*' + term + '.*' }});
+          if ( objetos.length==0 ) {
+            objetos =await this.responsivaModel.find({status:term });
+            
+            return objetos;
+          }
           
           return objetos;
         }
@@ -131,12 +136,10 @@ export class ResponsivasService {
 
   async update(term: string, updateResponsivaDto: UpdateResponsivaDto) {
 
-    let responsiva: Responsiva
-
+    const responsiva = await this.findOne( term );
     //Buscar por MongoID
     if ( isValidObjectId( term ) ){
-      responsiva = await this.responsivaModel.findById( term );
-      responsiva.updateOne ( updateResponsivaDto, { new: true })
+      await responsiva.updateOne( updateResponsivaDto);
     }
 
     return { ...responsiva.toJSON(), ...updateResponsivaDto };

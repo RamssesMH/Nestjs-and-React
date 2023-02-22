@@ -23,6 +23,7 @@ const promesaurl = (urlTabla) => {
     try {
       let data = await axios.get(urlTabla)
       resolve(data.data)
+      console.log(data.data)
     }
     catch {
       reject([])
@@ -53,14 +54,15 @@ const Formulario = () => {
   let month = date.getMonth() + 1;
   let year = date.getFullYear();
   let fecha = `${year}-${month}-${day}`;
-  const [mat, setInputMat] = useState("");
-  const [name, setInputName] = useState("");
-  const [rfc, setInputRfc] = useState("");
-  const [rol, setInputRol] = useState("");
-  const [usr, setInputUsr] = useState("");
+  const [mat, setInputMat] = useState(undefined);
+  // const [name, setInputName] = useState(null);
+  const [rfc, setInputRfc] = useState(undefined);
+  const [rol, setInputRol] = useState(undefined);
+  const [usr, setInputUsr] = useState(undefined);
   const [tr, setInputTr] = useState("");
   const [data, setData] = useState({
     matricula: "",
+    status: "activo",
     nombre: "",
     rfc: "",
     rol: "",
@@ -71,84 +73,72 @@ const Formulario = () => {
   })
    
   const handleSubmit = () => {
-
-    var cont= tr.length
-    cont--;
-    var sist=''
+    if(tr == ""){
+      swal('Advertencia', 'Ingresa datos validos', 'warning')
+      return
+    }
     var cod
     var matT = mat.split("::")
     data.matricula = matT[0]
-    data.nombre = name
+    data.nombre = matT[1]
     data.rfc = rfc
     data.rol = rol
     data.usuario = usr
     data.fecha = fecha
-    // console.log(data)
+    console.log(data)
 
-    while (cont >= 0) {
-      sist=tr[cont]
-      cod= matT[0] + sist;
-      data.codigo = cod
-      data.tipoResponsiva = sist
-      // console.log (data)
-      const postUrl ='http://localhost:3001/api/responsivas/'
-      axios.post(postUrl, data).then(res => {
-        if(res.status==201){
-          swal('Bien', 'Tu responsiva fue creada con exito', 'success')
-        }
-        this.setState({ status: true });
-      })
-      .catch(function (error) {
-        // console.log(error.response.status);
-        
-        if(error.response.status==500){
-          swal('Error', 'Esta responsiva ya fue creada anteriormente', 'error')
-        }
-        if(error.response.status==400){
-          swal('Advertencia', 'Ingresa datos validos', 'warning')
-        }
-      });
-      cont --;
+    cod= matT[0] + tr;
+    data.codigo = cod
+    data.tipoResponsiva = tr
+    console.log (data)
+    const postUrl ='http://localhost:3001/api/responsivas/'
+    axios.post(postUrl, data).then(res => {
+      if(res.status==201){
+        swal('Bien', 'Tu responsiva fue creada con exito', 'success')
+      }
+    })
+    .catch(function (error) {
+    // console.log(error.response.status);
+      
+    if(error.response.status == 500){
+      swal('Error', 'Esta responsiva ya fue creada anteriormente', 'error')
+      return
     }
+    if(error.response.status == 400){
+      swal('Advertencia', 'Ingresa datos validos', 'warning')
+      return
+    }
+  });
 
   }
 
 
-  const MenuProps = {
-    PaperProps: {
-      style: {
-        // maxHeight: ITEM_HEIGHT * 4.5 + ITEM_PADDING_TOP,
-        width: 250,
-      },
-    },
-  };
   const [personName, setPersonName] = React.useState([]);
 
-  const handleChange = (event) => {
-    const {
-      target: { value },
-    } = event;
-    setPersonName(
-      // On autofill we get a stringified value.
-      typeof value === 'string' ? value.split(' ,') : value,
-    );
-  };
+  // const handleChange = (event) => {
+  //   const {
+  //     target: { value },
+  //   } = event;
+  //   setPersonName(
+  //     // On autofill we get a stringified value.
+  //     typeof value === 'string' ? value.split(' ,') : value,
+  //   );
+  // };
 
-  const names = [
-    'FANUEVO',
-    'SIRE',
-    'HCEMP',
-  ];
+  const handleChange2 = (event) => {
+    setInputTr(event.target.value);
+  };
 
     return(
       
       <Box>
         <div>
-          <FormControl  sx={{ justifyContent: "left", width: '28.7%'}}>
+          <FormControl  sx={{ justifyContent: "left", width: '50%'}}>
           <Autocomplete sx={{m:0.97 }}
             value={setData.mat} 
             onChange={(event, newValue) => {
               setInputMat(newValue.descripcionbusqueda)
+              setInputRfc(newValue.rfc)
             }}
             size="false"
             open={open}
@@ -174,31 +164,27 @@ const Formulario = () => {
             )}
           />
           </FormControl>
-          
-          <TextField sx={{m: 1,}} onChange={(e) => setInputName(e.target.value)} value={setData.nombre}id="nombre" label="Nombre" variant="outlined" />
-          <TextField sx={{m: 1,}} helperText="Longitud de 12-13 caracteres" value={setData.ref} onChange={(e) => setInputRfc(e.target.value)}id="rfc"  label="RFC" variant="outlined" />
-        </div>
-        <div>
-        <FormControl sx={{ m: 1, justifyContent: "rigth", width: 210 }}>
+          <FormControl sx={{ m: 1, justifyContent: "rigth", width: '46.6%' }}>
         <InputLabel id="demo-multiple-checkbox-label">Sistemas</InputLabel>
         <Select
-          labelId="demo-multiple-checkbox-label"
-          id="tipoResponsiva"
-          multiple
-          value={personName}
-          onChange={(e) => { handleChange(e); setInputTr(e.target.value);  } }
-          input={<OutlinedInput label="Sistemas" />}
-          renderValue={(selected) => selected.join(', ')}
-          MenuProps={MenuProps}
+          labelId="demo-simple-select-helper-label"
+          id="demo-simple-select-helper"
+          value={tr}
+          onChange={(e) => { handleChange2(e); setInputTr(e.target.value);  } }
         >
-          {names.map((name) => (
-            <MenuItem key={name} value={name}>
-              <Checkbox checked={personName.indexOf(name) > -1} />
-              <ListItemText primary={name} />
-            </MenuItem>
-          ))}
+          <MenuItem value="">
+            <em>None</em>
+          </MenuItem>
+          <MenuItem value={'SIRE'}>SIRE</MenuItem>
+          <MenuItem value={'HCEMP'}>HCEMP</MenuItem>
+          <MenuItem value={'FANUEVO'}>FANUEVO</MenuItem>
         </Select>
       </FormControl>
+          {/* <TextField sx={{m: 1,}} onChange={(e) => setInputName(e.target.value)} value={setData.nombre}id="nombre" label="Nombre" variant="outlined" />
+          <TextField sx={{m: 1,}} helperText="Longitud de 12-13 caracteres" value={setData.ref} onChange={(e) => setInputRfc(e.target.value)}id="rfc"  label="RFC" variant="outlined" /> */}
+        </div>
+        <div>
+
           <TextField sx={{m: 1,}} value={setData.rol} onChange={(e) => setInputRol(e.target.value)} id="rol" label="Rol" variant="outlined" />
           <TextField sx={{m: 1,}} value={setData.usr} onChange={(e) => setInputUsr(e.target.value)} id="usuario" label="Usuario" variant="outlined" />
 

@@ -45,6 +45,11 @@ export class Responsiva extends Document{
         index: true,
     })
     codigo: string;
+
+    @Prop({
+        index: true,
+    })
+    status: string;
 }
 
 
